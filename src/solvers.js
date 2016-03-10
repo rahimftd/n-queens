@@ -152,51 +152,48 @@ window.findNQueensSolution = function(n) {
   return helper(n, 0, [board]);
 };
 
-// return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
-window.countNQueensSolutions = function(n) {
-  var solutionCount = 0;
-  if (n === 0 || n === 2 || n === 3) {
-    return solutionCount;
+var countNQueensSolutions = function(n) {
+  debugger;
+  var board = [];
+  for (var i = 0; i < n; i++) {
+    board[i] = 1;
   }
-  // Initialize a new board
-  var board = new Board({'n': n});
-
-  // Helper function that takes numQueens, currentRow, currentBoards
-  var helper = function(numQueens, currentRow, currentBoards) {
-    // Initiatlize a new currentBoards variables
-    var newCurrentBoards = [];
-    // Loop through all boards
-    for (var i = 0; i < currentBoards.length; i++) {
-      // Loop through currentRow
-      for (var j = 0; j < currentBoards[i].rows()[currentRow].length; j++) {
-        // Create a temp copy of the current board
-        var tempBoardMatrix = function() {
-          var arr = [];
-          for (var k = 0; k < currentBoards[i].rows().length; k++) {
-            arr.push(currentBoards[i].rows()[k].slice());
-          }
-          return arr;
-        }();
-        var tempBoard = new Board(tempBoardMatrix);
-        // Place queen
-        tempBoard.togglePiece(currentRow, j);
-        if (!tempBoard.hasAnyQueensConflicts()) {
-          if (numQueens === 1) {
-            solutionCount++;
-          } else {
-            // Otherwise push to newCurrentBoards
-            newCurrentBoards.push(tempBoard);
-          } 
+  var count = 0;
+  var helper = function(currBoard, numQueens, currentRow) {
+    if (numQueens === 0 && n !== 0) {
+      count++;
+    } else {
+      for (var i = 0; i < n; i++) {
+        currBoard[currentRow] = currBoard[currentRow] << 1;
+        if (!checkForInvalidCols(currBoard) && !checkForInvalidDiagonals(currBoard)) {
+          helper(currBoard.slice(), numQueens - 1, currentRow + 1);
         }
       }
     }
-    if (numQueens !== 1) {
-      return helper(numQueens - 1, currentRow + 1, newCurrentBoards);
+  };
+  helper(board.slice(), n, 0);
+  return count;
+};
+
+var checkForInvalidCols = function(board) {
+  for (var i = 0; i < board.length; i++) {
+    var currRow = board[i];
+    for (var j = i + 1; j < board.length; j++) {
+      if (currRow === board[j] && currRow !== 1) {
+        return true;
+      }
     }
   }
+  return false;
+};
 
-  helper(n, 0, [board]);
-
-  console.log('Number of solutions for ' + n + ' queens:', solutionCount);
-  return solutionCount;
+var checkForInvalidDiagonals = function(board) {
+  for (var i = 0; i < board.length; i++) {
+    for (var j = i + 1; j < board.length; j++) {
+      if ((board[j] / board[i] === Math.pow(2, j - i) || board[i] / board[j] === Math.pow(2, j - i)) && board[i] !== 1 && board[j] !== 1) {
+        return true;
+      }
+    }
+  }
+  return false;
 };
