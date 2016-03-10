@@ -30,11 +30,11 @@
     },
 
     _getFirstRowColumnIndexForMajorDiagonalOn: function(rowIndex, colIndex) {
-      return Math.max(colIndex - rowIndex, 0);
+      return colIndex - rowIndex;
     },
 
     _getFirstRowColumnIndexForMinorDiagonalOn: function(rowIndex, colIndex) {
-      return Math.min(colIndex + rowIndex, 3);
+      return colIndex + rowIndex;
     },
 
     hasAnyRooksConflicts: function() {
@@ -42,7 +42,7 @@
     },
 
     isValidRookSquare: function(rowIndex, colIndex) {
-      return this.hasPieceOnRow(rowIndex) || this.hasPieceOnCol(colIndex);
+      return !(this.hasPieceOnRow(rowIndex) || this.hasPieceOnCol(colIndex));
     },
 
     hasAnyQueenConflictsOn: function(rowIndex, colIndex) {
@@ -56,6 +56,12 @@
 
     hasAnyQueensConflicts: function() {
       return this.hasAnyRooksConflicts() || this.hasAnyMajorDiagonalConflicts() || this.hasAnyMinorDiagonalConflicts();
+    },
+
+    isValidQueensSquare: function(rowIndex, colIndex) {
+      var majorDiagonalIndex = this._getFirstRowColumnIndexForMajorDiagonalOn(rowIndex, colIndex);
+      var minorDiagonalIndex = this._getFirstRowColumnIndexForMinorDiagonalOn(rowIndex, colIndex);
+      return !(this.hasPieceOnRow(rowIndex) || this.hasPieceOnCol(colIndex) || this.hasPieceOnMajorDiagonal(majorDiagonalIndex) || this.hasPieceOnMinorDiagonal(minorDiagonalIndex));
     },
 
     _isInBounds: function(rowIndex, colIndex) {
@@ -191,26 +197,29 @@
     //
     // test if a specific major diagonal on this board contains a conflict
     hasMajorDiagonalConflictAt: function(majorDiagonalColumnIndexAtFirstRow) {
-      // Initialize board variable
+      // Initalize variable that stores starting row of diagonal
+      if (majorDiagonalColumnIndexAtFirstRow < 0) {
+        var startRow = Math.abs(majorDiagonalColumnIndexAtFirstRow);
+      } else {
+        var startRow = 0;
+      }
+      // Store the board array
       var board = this.rows();
-      // Store column index
-      var colIndex = majorDiagonalColumnIndexAtFirstRow;
-      // Iterate through squares in the column
-      for (var i = 0; i < board.length; i++) {
-        // Create variable to store squares in diagonal
-        var squaresInDiagonal = this.get('n') - i;
-        // Initialize new count varaible
-        var count = 0;
-        // Iterate through squares in diagonal
-        for (var j = 0; j < squaresInDiagonal; j++) {
-          // Check if there is a diagonal conflict 
-          if (board[i + j][colIndex + j] === 1) {
-            // Increment count
+      // Initialize a count variable
+      var count = 0;
+
+      var n = this.get('n');
+
+      // Iterate through the diagonal
+      for (var i = majorDiagonalColumnIndexAtFirstRow; i < board.length; i++) {
+        if (i >= 0 && startRow < n) {
+          if (board[startRow][i] === 1) {
             count++;
           }
           if (count > 1) {
             return true;
           }
+          startRow++;
         }
       }
       return false;
@@ -218,11 +227,12 @@
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
       var board = this.rows();
-      for (var i = 0; i < board.length; i++) {
+      var n = this.get('n');
+      for (var i = ((-1 * n) + 1); i < n; i++) {
         if (this.hasMajorDiagonalConflictAt(i)) {
           return true;
         }
-      } 
+      }
       return false;
     },
 
@@ -235,29 +245,29 @@
     //
     // test if a specific minor diagonal on this board contains a conflict
     hasMinorDiagonalConflictAt: function(minorDiagonalColumnIndexAtFirstRow) {
-      // Initialize board variable
+      // Store n
+      var n = this.get('n');
+      // Initalize variable that stores starting row of diagonal
+      if (minorDiagonalColumnIndexAtFirstRow > (n - 1)) {
+        var startRow = minorDiagonalColumnIndexAtFirstRow - n + 1;
+      } else {
+        var startRow = 0;
+      }
+      // Store the board array
       var board = this.rows();
-      // Store column index
-      var colIndex = minorDiagonalColumnIndexAtFirstRow;
-      // Iterate through squares in the column
-      for (var i = 0; i < board.length; i++) {
-        // Create variable to store squares in diagonal
-        var squaresInDiagonal = this.get('n') - i;
-        // Initialize new count varaible
-        var count = 0;
-        // Variable to track current row
-        var currentRow = 0;
-        // Iterate through squares in diagonal
-        for (var j = (squaresInDiagonal - 1); j >= 0; j--) {
-          // Check if there is a diagonal conflict 
-          if (board[i + currentRow][colIndex - currentRow] === 1) {
-            // Increment count
+      // Initialize a count variable
+      var count = 0;
+
+      // Iterate through the diagonal
+      for (var i = minorDiagonalColumnIndexAtFirstRow; i >= 0; i--) {
+        if (i < n && startRow < n) {
+          if (board[startRow][i] === 1) {
             count++;
           }
           if (count > 1) {
             return true;
           }
-          currentRow++;
+          startRow++;
         }
       }
       return false;
@@ -266,13 +276,72 @@
     // test if any minor diagonals on this board contain conflicts
     hasAnyMinorDiagonalConflicts: function() {
       var board = this.rows();
-      for (var i = 0; i < board.length; i++) {
+      var n = this.get('n');
+      for (var i = 0; i <= (n+1); i++) {
         if (this.hasMinorDiagonalConflictAt(i)) {
           return true;
         }
-      } 
+      }
       return false;
-    }
+    },
+
+    hasPieceOnMajorDiagonal: function(majorDiagonalColumnIndexAtFirstRow) {
+      // Initalize variable that stores starting row of diagonal
+      if (majorDiagonalColumnIndexAtFirstRow < 0) {
+        var startRow = Math.abs(majorDiagonalColumnIndexAtFirstRow);
+      } else {
+        var startRow = 0;
+      }
+      // Store the board array
+      var board = this.rows();
+      // Initialize a count variable
+      var count = 0;
+
+      var n = this.get('n');
+
+      // Iterate through the diagonal
+      for (var i = majorDiagonalColumnIndexAtFirstRow; i < board.length; i++) {
+        if (i >= 0 && startRow < n) {
+          if (board[startRow][i] === 1) {
+            count++;
+          }
+          if (count > 0) {
+            return true;
+          }
+          startRow++;
+        }
+      }
+      return false;
+    },
+
+    hasPieceOnMinorDiagonal: function(minorDiagonalColumnIndexAtFirstRow) {
+      // Store n
+      var n = this.get('n');
+      // Initalize variable that stores starting row of diagonal
+      if (minorDiagonalColumnIndexAtFirstRow > (n - 1)) {
+        var startRow = minorDiagonalColumnIndexAtFirstRow - n + 1;
+      } else {
+        var startRow = 0;
+      }
+      // Store the board array
+      var board = this.rows();
+      // Initialize a count variable
+      var count = 0;
+
+      // Iterate through the diagonal
+      for (var i = minorDiagonalColumnIndexAtFirstRow; i >= 0; i--) {
+        if (i < n && startRow < n) {
+          if (board[startRow][i] === 1) {
+            count++;
+          }
+          if (count > 0) {
+            return true;
+          }
+          startRow++;
+        }
+      }
+      return false;
+    },
 
     /*--------------------  End of Helper Functions  ---------------------*/
 

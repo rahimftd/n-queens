@@ -37,7 +37,7 @@ window.findNRooksSolution = function(n) {
         }();
         var tempBoard = new Board(tempBoardMatrix);
         // Check if rook can be placed
-        if (!tempBoard.isValidRookSquare(currentRow, j)) {
+        if (tempBoard.isValidRookSquare(currentRow, j)) {
           // Place rook
           tempBoard.togglePiece(currentRow, j);
           if (numRooks === 1) {
@@ -82,7 +82,7 @@ window.countNRooksSolutions = function(n) {
         }();
         var tempBoard = new Board(tempBoardMatrix);
         // Check if rook can be placed
-        if (!tempBoard.isValidRookSquare(currentRow, j)) {
+        if (tempBoard.isValidRookSquare(currentRow, j)) {
           // Place rook
           tempBoard.togglePiece(currentRow, j);
           if (numRooks === 1) {
@@ -95,7 +95,7 @@ window.countNRooksSolutions = function(n) {
       }
     }
     if (numRooks !== 1) {
-      return helper(numRooks - 1, currentRow + 1, newCurrentBoards);
+      helper(numRooks - 1, currentRow + 1, newCurrentBoards);
     }
   }
 
@@ -131,9 +131,9 @@ window.findNQueensSolution = function(n) {
           return arr;
         }();
         var tempBoard = new Board(tempBoardMatrix);
-        // Place queen
-        tempBoard.togglePiece(currentRow, j);
-        if (!tempBoard.hasAnyQueensConflicts()) {
+        if (tempBoard.isValidQueensSquare(currentRow, j)) {
+          // Place queen
+          tempBoard.togglePiece(currentRow, j);
           if (numQueens === 1) {
             console.log('Single solution for ' + n + ' queens:', JSON.stringify(tempBoard.rows()));
             return tempBoard.rows();
@@ -178,9 +178,9 @@ window.countNQueensSolutions = function(n) {
           return arr;
         }();
         var tempBoard = new Board(tempBoardMatrix);
-        // Place queen
-        tempBoard.togglePiece(currentRow, j);
-        if (!tempBoard.hasAnyQueensConflicts()) {
+        if (tempBoard.isValidQueensSquare(currentRow, j)) {
+          // Place queen
+          tempBoard.togglePiece(currentRow, j);
           if (numQueens === 1) {
             solutionCount++;
           } else {
@@ -191,7 +191,7 @@ window.countNQueensSolutions = function(n) {
       }
     }
     if (numQueens !== 1) {
-      return helper(numQueens - 1, currentRow + 1, newCurrentBoards);
+      helper(numQueens - 1, currentRow + 1, newCurrentBoards);
     }
   }
 
