@@ -10,7 +10,7 @@ describe('Board', function() {
     var board = new Board(matrix);
     _.map('row col rooks majorDiagonal minorDiagonal queens'.split(' '), function(conflictType) {
       var conflictDetected = board['hasAny' + capitalize(conflictType) + 'Conflicts']();
-      var conflictExpected = _(expectedConflicts).contains(conflictType);
+      var conflictExpected = _.contains(expectedConflicts, conflictType);
       var message = conflictExpected ? 'should' : 'should not';
 
       it(message + ' find a ' + conflictType + ' conflict', function() {
@@ -27,7 +27,6 @@ describe('Board', function() {
       [0, 0, 0, 0]
     ]);
   });
-
   describe('Board with row conflicts', function() {
     verifyConflictTypes(['row', 'rooks', 'queens'], [
       [0, 0, 0, 0],
